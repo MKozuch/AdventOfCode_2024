@@ -29,8 +29,7 @@ impl Direction {
 
 type DirectionList = Vec<Direction>;
 
-#[derive(PartialEq)]
-#[derive(Clone, Copy)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum WarehouseItem {
     Nothing,
     Box,
@@ -77,8 +76,8 @@ impl WarehousePos {
     pub fn next_pos(&self, dir: Direction) -> WarehousePos {
         let (d_y, d_x) = dir.to_vector();
         WarehousePos {
-            pos_y: self.pos_y + d_y,
-            pos_x: self.pos_x + d_x,
+            pos_y: ((self.pos_y as i64) + d_y) as usize,
+            pos_x: ((self.pos_x as i64) + d_x) as usize,
         }
     }
 }
@@ -90,7 +89,7 @@ pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<WarehouseP
         let mut line = String::from_iter(line.iter().map(WarehouseItem::to_char));
 
         if let Some(robot) = robot {
-            if robot.pos_y == line_idx as i64 {
+            if robot.pos_y == line_idx {
                 let pos = robot.pos_x as usize;
                 line.replace_range(pos..pos + 1, "@");
             }
@@ -110,11 +109,26 @@ pub fn simulate_robot_move(
 
     match item_at_new_pos {
         WarehouseItem::Nothing => *robot = next_robot_step,
-        WarehouseItem::Wall => {},
+        WarehouseItem::Wall => {}
         WarehouseItem::Robot => panic!(),
         WarehouseItem::Box => {
-            let asd = Vec::<&WarehouseItem>
-        },
+            let mut next_item_pos = next_robot_step.next_pos(move_dir);
+            let mut next_item = warehouse_map[next_item_pos.pos_y][next_item_pos.pos_x];
+
+            loop {
+                if next_item == WarehouseItem::Nothing {
+                    warehouse_map[next_robot_step.pos_y][next_robot_step.pos_x] = WarehouseItem::Nothing;
+                    warehouse_map[next_item_pos.pos_y][next_item_pos.pos_x] = WarehouseItem::Box;
+                    *robot = next_robot_step;
+                    return;
+                } else if next_item == WarehouseItem::Box {
+                    next_item_pos = next_item_pos.next_pos(move_dir);
+                    next_item = warehouse_map[next_item_pos.pos_y][next_item_pos.pos_x];
+                } else if next_item == WarehouseItem::Wall {
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -144,8 +158,8 @@ pub fn find_robot(input: &str) -> WarehousePos {
     for (line_num, line) in input.split("\n").enumerate() {
         if let Some(index) = line.chars().position(|chr| chr == '@') {
             return WarehousePos {
-                pos_y: line_num as i64,
-                pos_x: index as i64,
+                pos_y: line_num,
+                pos_x: index,
             };
         }
     }
