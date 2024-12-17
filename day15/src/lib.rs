@@ -30,6 +30,7 @@ impl Direction {
 type DirectionList = Vec<Direction>;
 
 #[derive(PartialEq)]
+#[derive(Clone, Copy)]
 pub enum WarehouseItem {
     Nothing,
     Box,
@@ -67,22 +68,22 @@ impl std::fmt::Display for WarehouseItem {
 }
 
 #[derive(Clone, Copy)]
-pub struct RobotPos {
-    pub pos_y: i64,
-    pub pos_x: i64,
+pub struct WarehousePos {
+    pub pos_y: usize,
+    pub pos_x: usize,
 }
 
-impl RobotPos {
-    pub fn next_pos(&self, dir: Direction) -> RobotPos {
+impl WarehousePos {
+    pub fn next_pos(&self, dir: Direction) -> WarehousePos {
         let (d_y, d_x) = dir.to_vector();
-        RobotPos {
+        WarehousePos {
             pos_y: self.pos_y + d_y,
             pos_x: self.pos_x + d_x,
         }
     }
 }
 
-pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<RobotPos>) {
+pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<WarehousePos>) {
     //let output = Vec::<String>::new();
 
     for (line_idx, line) in warehouse_map.iter().enumerate() {
@@ -101,10 +102,20 @@ pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<RobotPos>)
 
 pub fn simulate_robot_move(
     warehouse_map: &mut WarehouseMap,
-    robot: &mut RobotPos,
+    robot: &mut WarehousePos,
     move_dir: Direction,
 ) {
-    todo!()
+    let next_robot_step = robot.next_pos(move_dir);
+    let item_at_new_pos = warehouse_map[next_robot_step.pos_y][next_robot_step.pos_x];
+
+    match item_at_new_pos {
+        WarehouseItem::Nothing => *robot = next_robot_step,
+        WarehouseItem::Wall => {},
+        WarehouseItem::Robot => panic!(),
+        WarehouseItem::Box => {
+            let asd = Vec::<&WarehouseItem>
+        },
+    }
 }
 
 pub fn parse_directions(input: &str) -> DirectionList {
@@ -129,10 +140,10 @@ pub fn parse_map(input: &str) -> WarehouseMap {
     lines_iter.map(parse_line).collect()
 }
 
-pub fn find_robot(input: &str) -> RobotPos {
+pub fn find_robot(input: &str) -> WarehousePos {
     for (line_num, line) in input.split("\n").enumerate() {
         if let Some(index) = line.chars().position(|chr| chr == '@') {
-            return RobotPos {
+            return WarehousePos {
                 pos_y: line_num as i64,
                 pos_x: index as i64,
             };
@@ -142,7 +153,7 @@ pub fn find_robot(input: &str) -> RobotPos {
     panic!();
 }
 
-pub fn parse_input(input: &str) -> (WarehouseMap, DirectionList, RobotPos) {
+pub fn parse_input(input: &str) -> (WarehouseMap, DirectionList, WarehousePos) {
     let (warehouse_input, directions_input) = input.split_once("\n\n").unwrap();
 
     let direction_list = parse_directions(directions_input);
