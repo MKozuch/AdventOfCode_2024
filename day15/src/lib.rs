@@ -17,12 +17,12 @@ impl Direction {
         }
     }
 
-    fn to_vector(&self) -> (i64, i64){
+    fn to_vector(&self) -> (i64, i64) {
         match self {
-            Direction::Up    => ( -1,  0),
-            Direction::Down  => (  1,  0),
-            Direction::Left  => (  0, -1),
-            Direction::Right => (  0,  1),
+            Direction::Up => (-1, 0),
+            Direction::Down => (1, 0),
+            Direction::Left => (0, -1),
+            Direction::Right => (0, 1),
         }
     }
 }
@@ -75,9 +75,11 @@ pub struct RobotPos {
 impl RobotPos {
     pub fn next_pos(&self, dir: Direction) -> RobotPos {
         let (d_y, d_x) = dir.to_vector();
-        RobotPos{pos_y: self.pos_y + d_y, pos_x: self.pos_x + d_x}
+        RobotPos {
+            pos_y: self.pos_y + d_y,
+            pos_x: self.pos_x + d_x,
+        }
     }
-    
 }
 
 pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<RobotPos>) {
@@ -89,7 +91,7 @@ pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<RobotPos>)
         if let Some(robot) = robot {
             if robot.pos_y == line_idx as i64 {
                 let pos = robot.pos_x as usize;
-                line.replace_range(pos..pos+1, "@");
+                line.replace_range(pos..pos + 1, "@");
             }
         }
 
@@ -97,7 +99,11 @@ pub fn draw_warehouse_map(warehouse_map: &WarehouseMap, robot: Option<RobotPos>)
     }
 }
 
-pub fn simulate_robot_move(warehouse_map: &mut WarehouseMap, robot: &mut RobotPos, move_dir: Direction) {
+pub fn simulate_robot_move(
+    warehouse_map: &mut WarehouseMap,
+    robot: &mut RobotPos,
+    move_dir: Direction,
+) {
     todo!()
 }
 
@@ -150,7 +156,7 @@ pub fn calc_gps_coords(warehouse_map: &WarehouseMap) -> u64 {
     let mut sum = 0_u64;
 
     for (line_idx, line) in warehouse_map.iter().enumerate() {
-        for(item_idx, item) in line.iter().enumerate() {
+        for (item_idx, item) in line.iter().enumerate() {
             if *item == WarehouseItem::Box {
                 sum += (100 * line_idx as u64) + (item_idx as u64);
             }
@@ -165,10 +171,30 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let data;
-        let result = do_calculations(&data);
-        let exp_result;
-        assert_eq!(result, exp_result);
+    fn calc_gps_coords_test() {
+        let input = r"
+#######
+#...O..
+#......
+";
+        let warehouse_map = parse_map(input);
+        let gps_score = calc_gps_coords(&warehouse_map);
+        assert_eq!(gps_score, 104);
+
+        let input = r"
+##########
+#.O.O.OOO#
+#........#
+#OO......#
+#OO@.....#
+#O#.....O#
+#O.....OO#
+#O.....OO#
+#OO....OO#
+##########
+";
+        let warehouse_map = parse_map(input);
+        let gps_score = calc_gps_coords(&warehouse_map);
+        assert_eq!(gps_score, 10092);
     }
 }
