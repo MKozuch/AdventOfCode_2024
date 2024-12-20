@@ -18,13 +18,3 @@ fn main() {
     
     println!("Result: {}", path.cost());
 }
-
-//println!("Result: {result}");
-
-
-// 106476 too low
-// 106477 too low
-
-// 107474 wrong
-// 107475 wrong 
-// 107476 too high
